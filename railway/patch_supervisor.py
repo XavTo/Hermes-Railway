@@ -20,6 +20,17 @@ replacement = '''    if Path("/run/hermes-railway/s6.pid").exists():
 assert source.count(needle) == 1, 'Hermes service-manager changed; review the Railway shim'
 path.write_text(source.replace(needle, replacement))
 
+# Dashboard actions must use the sealed image's published CLI launcher. The
+# source-install bootstrap expects a PM dependency generation that the official
+# Docker image does not have. Preserve native action isolation and permissions.
+path = Path('/opt/hermes/hermes_cli/web_server_gateway.py')
+source = path.read_text()
+needle = '    cmd = runtime_command(PROJECT_ROOT, subcommand)'
+assert source.count(needle) == 1, 'Hermes action launcher changed; review image integration'
+assert Path('/opt/hermes/libexec/hermes').is_file(), 'Official image launcher is missing'
+replacement = '    cmd = [str(PROJECT_ROOT / "libexec" / "hermes"), *subcommand]'
+path.write_text(source.replace(needle, replacement))
+
 # Railway terminates HTTPS before the container. Keep upstream's bounded
 # proxy trust, while making its cookie helpers honor this HTTPS-only stack.
 # Never trust a client-supplied forwarded header to decide cookie security.
