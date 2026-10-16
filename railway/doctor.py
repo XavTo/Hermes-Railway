@@ -1,5 +1,5 @@
 #!/opt/hermes/.venv/bin/python
-"""Fixed-scope stack diagnostics. Never reads or prints provider credentials."""
+"""Fixed-scope stack diagnostics. Never prints provider credentials."""
 import argparse
 import asyncio
 import json
@@ -39,7 +39,10 @@ if args.search:
     out['search'] = {'ok': result.get('success') is True and bool(rows), 'resultCount': len(rows),
                      'urls': [row.get('url') for row in rows]}
     extracted = json.loads(asyncio.run(web_extract_tool(['https://example.com'], char_limit=1500)))
-    out['extraction'] = {'ok': extracted.get('success') is True, 'containsExampleDomain': 'Example Domain' in json.dumps(extracted)}
+    pages = extracted.get('results') or []
+    out['extraction'] = {'ok': bool(pages) and all(not page.get('error') for page in pages),
+                         'containsExampleDomain': 'Example Domain' in json.dumps(extracted),
+                         'errors': [page['error'] for page in pages if page.get('error')] or extracted.get('error')}
 if args.browser:
     from tools.browser_tool import browser_navigate, browser_console
     task = 'railway-stack-diagnostics'
@@ -48,4 +51,6 @@ if args.browser:
     out['browser'] = {'ok': nav.get('success') is True and evaluated.get('success') is True,
                       'title': evaluated.get('result'), 'navigationError': nav.get('error'),
                       'evaluationError': evaluated.get('error')}
+    from tools.browser_tool_lifecycle import _cleanup_single_browser_session
+    _cleanup_single_browser_session(task)
 print(json.dumps(out, ensure_ascii=False))

@@ -15,10 +15,10 @@ home = Path('/opt/data')
 # supported env store so the provider and diagnostics can resolve it there.
 if os.environ.get('SEARXNG_URL'):
     save_env_value('SEARXNG_URL', os.environ['SEARXNG_URL'])
-marker = home / '.railway-research-seeded-v1'
+marker = home / '.railway-research-seeded-v2'
 if not marker.exists():
     cfg = load_config()
-    cfg.setdefault('web', {}).update(search_backend='searxng', extract_backend='native',
+    cfg.setdefault('web', {}).update(search_backend='searxng', extract_backend='railway-local',
                                     keyless_fallback=False, keyless_rescue=False)
     cfg.setdefault('browser', {}).update(backend='off', cloud_provider='local', engine='chrome')
     save_config(cfg)

@@ -20,7 +20,7 @@ This template uses the official **Hermes Agent v0.22.2** image, pinned by digest
 | Included | Benefit |
 | --- | --- |
 | Private SearXNG service, already connected to Hermes's native search provider | Search without configuring a separate search API subscription |
-| Native page extraction and local Chromium selected by default | Read pages and interact with JavaScript sites without a cloud-browser subscription |
+| Local Chromium and a bundled rendered-page extraction provider | Read pages, including JavaScript content, without a cloud extraction or browser subscription |
 | Research skill with a cited-report workflow | Save useful Markdown reports with source links in the persistent workspace |
 | `hermes-railway-doctor` diagnostics command | Check the real supervisor, runtime, search connection and local browser without printing API keys |
 | Upstream s6 gateway lifecycle adapted for Railway's wrapped runtime | Dashboard and gateway work together; gateway controls use the real supervisor |
@@ -30,6 +30,8 @@ This template uses the official **Hermes Agent v0.22.2** image, pinned by digest
 SearXNG forwards queries to upstream search engines; those engines can rate-limit or block requests. It is a private instance, not an anonymity guarantee. The template disables Hermes's external keyless-search fallback by default so failed searches do not silently move to another API. You can change web and browser settings in the dashboard. Local Chromium uses this service's CPU and memory; it is not an isolated desktop VM.
 
 The bundled research skill is an additional workflow. The dashboard, chat, terminal, memory, cron, skills and backups are native Hermes features, not features invented by this template.
+
+The `railway-local` web extraction plugin uses Hermes's existing local-browser tools and keeps the native `web_extract` validation, private-network URL filtering, truncation and redaction. It returns rendered page text rather than promising access to every website. Authentication walls, CAPTCHAs and website restrictions still apply.
 
 From the authenticated chat terminal, run `!hermes-railway-doctor` for a local status report. Add `--search --browser` to check a real example search, page extraction and local Chromium. These optional network checks query public documentation and open example.com; they do not use your model provider or reveal its credentials.
 
